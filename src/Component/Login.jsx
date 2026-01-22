@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, User, Mail, Lock, ArrowRight, ClipboardList } from 'lucide-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Eye, EyeOff, User, Mail, Lock, ArrowRight, ClipboardList, Loader2 } from 'lucide-react';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -13,6 +14,17 @@ const LoginPage = () => {
     username: '',
     email: '',
     password: ''
+  });
+
+  // Fetch dynamic content from API
+  const { data: surveyContent, isLoading: contentLoading } = useQuery({
+    queryKey: ['getContent'],
+    queryFn: async () => {
+      const response = await api.get('api/content/getcontent');
+      return response.data;
+    },
+    // Safely mapping the nested data structure you provided
+    select: (res) => res?.data || {},
   });
 
   const authMutation = useMutation({
@@ -44,35 +56,47 @@ const LoginPage = () => {
     authMutation.mutate(formData);
   };
 
+  // Loading state for initial content fetch
+  if (contentLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin text-indigo-600" size={48} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f3f4f6] flex items-center justify-center p-4 font-sans">
       <div className="bg-white w-full max-w-[1100px] flex rounded-3xl shadow-2xl overflow-hidden min-h-[650px] border border-slate-100">
         
-        {/* Left Side (Context & Branding) */}
+        {/* Left Side (Context & Branding) - NOW DYNAMIC */}
         <div className="hidden lg:flex w-5/12 bg-[#1e293b] p-12 flex-col justify-between text-white relative">
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-6">
                <ClipboardList className="text-indigo-400" size={32} />
-               <span className="text-sm font-semibold tracking-widest uppercase text-indigo-300">Political Survey 2081</span>
+               <span className="text-sm font-semibold tracking-widest uppercase text-indigo-300">
+                 {surveyContent?.titleEn || "Political Survey"}
+               </span>
             </div>
             <h1 className="text-3xl font-bold mb-4 leading-tight">
-              सिन्धुपाल्चोक निर्वाचन क्षेत्र १ <br/>
-              <span className="text-indigo-400">राजनीतिक शल्यकृया</span>
+              {surveyContent?.titleNp || "सिन्धुपाल्चोक निर्वाचन क्षेत्र १"} <br/>
+              <span className="text-indigo-400">{surveyContent?.subtitle || "राजनीतिक शल्यकृया"}</span>
             </h1>
             <div className="h-1 w-20 bg-indigo-500 mb-6"></div>
             <p className="text-slate-300 text-sm leading-relaxed mb-4">
-              जुगल, भोटेकोशी, त्रिपुरासुन्दरी, लिसङ्खुपाखर, सुनकोशी, बलेफी, बाह्रबिसे र चौतारा साँगाचोकगढी (२-४, ९, १०) समेटिएको बृहत् सर्वेक्षण।
+              {surveyContent?.description || "बृहत् सर्वेक्षण क्षेत्र विवरण..."}
             </p>
           </div>
 
           <div className="relative z-10 bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
-            <p className="text-xs text-slate-400 uppercase tracking-wider mb-2 font-bold">अनुसन्धान नैतिकता</p>
+            <p className="text-xs text-slate-400 uppercase tracking-wider mb-2 font-bold">
+              {surveyContent?.greeting || "नमस्कार !"}
+            </p>
             <p className="italic text-sm text-slate-200">
               "यस अनुसन्धानमा तपाईंको नाम गोप्य वा खुला राख्न सकिनेछ। प्राप्त तथ्याङ्क केवल विश्लेषणका लागि प्रयोग गरिनेछ।"
             </p>
           </div>
 
-          {/* Abstract background element */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
         </div>
 

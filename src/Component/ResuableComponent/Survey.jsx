@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Survey = ({ DevData, dispatch, section }) => {
+const Survey = ({ DevData, dispatch, section, onSubmit, isSubmitting = false }) => {
   
   const handleInputChange = (questionId, value, type, optionLabel = null) => {
     dispatch({
@@ -13,19 +13,45 @@ const Survey = ({ DevData, dispatch, section }) => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto my-6 md:my-10 p-0 md:p-2">
+    <div className="max-w-7xl mx-auto my-6 md:my-10 p-0 md:p-2">
       {/* Survey Card Container */}
       <div className="bg-white shadow-2xl rounded-3xl border border-gray-100 overflow-hidden">
         
-        {/* Header Section with Gradient Accent */}
-        <div className="bg-gradient-to-r from-blue-700 to-indigo-800 p-6 md:p-10 text-white">
-          <h1 className="text-2xl md:text-4xl font-black mb-3 leading-tight">
-            {DevData?.Topic}
-          </h1>
-          <div className="flex items-center gap-2 text-blue-100 opacity-90 italic">
-            <span className="h-1 w-8 bg-blue-400 rounded-full"></span>
-            <h2 className="text-lg md:text-xl font-medium">{DevData?.Subject}</h2>
+        {/* Header Section - Now with Submit Button */}
+        <div className="bg-gradient-to-r from-blue-700 to-indigo-800 p-6 md:p-10 text-white flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h1 className="text-2xl md:text-4xl font-black mb-3 leading-tight">
+              {DevData?.Topic}
+            </h1>
+            <div className="flex items-center gap-2 text-blue-100 opacity-90 italic">
+              <span className="h-1 w-8 bg-blue-400 rounded-full"></span>
+              <h2 className="text-lg md:text-xl font-medium">{DevData?.Subject}</h2>
+            </div>
           </div>
+
+          {/* New Submit Button */}
+          <button
+            onClick={onSubmit}
+            disabled={isSubmitting}
+            className="group relative flex items-center justify-center gap-3 bg-white text-blue-800 px-8 py-4 rounded-2xl font-bold text-lg shadow-xl hover:bg-blue-50 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden"
+          >
+            {isSubmitting ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-5 w-5 text-blue-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              </span>
+            ) : (
+              <>
+                <span>सबमिट गर्नुहोस्</span>
+                <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </>
+            )}
+          </button>
         </div>
 
         <div className="p-6 md:p-10 space-y-12">
@@ -52,7 +78,6 @@ const Survey = ({ DevData, dispatch, section }) => {
                       className={`${isText ? "col-span-full" : "col-span-1"}`}
                     >
                       {opt.type === "checkbox" ? (
-                        /* Choice Card Style */
                         <label 
                           className={`relative flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 active:scale-[0.98] ${
                             q.answer === opt.option 
@@ -70,7 +95,6 @@ const Survey = ({ DevData, dispatch, section }) => {
                                 handleInputChange(q.id, val, 'checkbox');
                               }}
                             />
-                            {/* Custom checkmark icon */}
                             <svg className="absolute w-4 h-4 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                             </svg>
@@ -78,7 +102,6 @@ const Survey = ({ DevData, dispatch, section }) => {
                           <span className="text-lg font-semibold text-gray-700">{opt.option}</span>
                         </label>
                       ) : (
-                        /* Premium Input Field */
                         <div className="mt-2 group/input">
                           <label className="text-sm font-bold text-blue-600/70 block mb-2 uppercase tracking-wider ml-1">
                             {opt.option}
