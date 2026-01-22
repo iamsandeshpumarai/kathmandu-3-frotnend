@@ -2,19 +2,17 @@ import React from 'react';
 
 const VoterProfileTable = ({ state, dispatch }) => {
   
-  // The first 7 fields
   const fields = [
     { label: 'नाम', sub: '(Name)', name: 'name' },
     { label: 'उमेर', sub: '(Age)', name: 'age' },
     { label: 'थर / जाति', sub: '(Caste)', name: 'caste' },
-    { label: 'लिङ्ग', sub: '(Gender)', name: 'gender' },
+    { label: 'लिङ्ग', sub: '(Gender)', name: 'gender', type: 'select' }, // Added type: 'select'
     { label: 'हलको पेशा', sub: '(Occupation)', name: 'currentJob' },
     { label: 'सम्पर्क नं.', sub: '(Contact)', name: 'phoneNumber' },
     { label: 'परिवार संख्या', sub: '(Family Member)', name: 'familyNumber' },
     { label: 'धार्मिक आस्था', sub: '(Religious Belief)', name: 'religiousAffiliation' },
     { label: 'उत्तीर्ण माथिल्लो शैक्षिक तह', sub: '(Education Level)', name: 'educationLevel' },
     { label: 'वर्ग', sub: '(class)', name: 'class' }
-    
   ];
 
   const handleChange = (e) => {
@@ -25,7 +23,7 @@ const VoterProfileTable = ({ state, dispatch }) => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 font-sans">
+    <div className="max-w-7xl mx-auto px-4 py-8 font-sans">
       {/* Table Title Header */}
       <div className="hidden md:grid grid-cols-2 gap-0 border-x border-t border-gray-800 bg-slate-800 text-white">
         <div className="grid grid-cols-12">
@@ -41,7 +39,6 @@ const VoterProfileTable = ({ state, dispatch }) => {
       {/* Main Grid Container */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-l border-t md:border-t-0 border-gray-300 shadow-xl overflow-hidden">
         
-        {/* Render the 7 Profile Fields */}
         {fields.map((field, index) => (
           <div key={index} className="grid grid-cols-12 border-r border-b border-gray-300 items-stretch">
             <div className="col-span-4 bg-slate-100 p-3 flex flex-col justify-center border-r border-gray-300">
@@ -49,18 +46,33 @@ const VoterProfileTable = ({ state, dispatch }) => {
               <span className="text-xs text-blue-600 italic">{field.sub}</span>
             </div>
             <div className="col-span-8 bg-white flex items-center">
-              <input
-                type="text"
-                name={field.name}
-                value={state[field.name] || ''}
-                onChange={handleChange}
-                className="w-full h-full px-4 py-3 outline-none focus:bg-blue-50 text-lg"
-              />
+              {/* Conditional rendering for Gender Dropdown */}
+              {field.name === 'gender' ? (
+                <select
+                  name={field.name}
+                  value={state[field.name] || ''}
+                  onChange={handleChange}
+                  className="w-full h-full px-4 py-3 outline-none focus:bg-blue-50 text-lg bg-transparent cursor-pointer appearance-none"
+                >
+                  <option value="">छान्नुहोस् (Select)</option>
+                  <option value="पुरुष">पुरुष (Male)</option>
+                  <option value="महिला">महिला (Female)</option>
+                  <option value="अन्य">अन्य (Other)</option>
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  name={field.name}
+                  value={state[field.name] || ''}
+                  onChange={handleChange}
+                  className="w-full h-full px-4 py-3 outline-none focus:bg-blue-50 text-lg"
+                />
+              )}
             </div>
           </div>
         ))}
 
-        {/* 8th Field: Location Selection only (No Label) */}
+        {/* 8th Field: Location Selection */}
         <div className="grid grid-cols-12 border-r border-b border-gray-300 items-stretch">
           <div className="col-span-12 bg-white flex items-center justify-around px-4 py-3">
             <label className="flex items-center gap-3 cursor-pointer group">
@@ -75,7 +87,7 @@ const VoterProfileTable = ({ state, dispatch }) => {
               <span className="text-lg font-bold text-slate-800">स्वदेशमा</span>
             </label>
             
-            <div className="h-8 w-[1px] bg-gray-300"></div> {/* Visual Divider */}
+            <div className="h-8 w-[1px] bg-gray-300"></div>
 
             <label className="flex items-center gap-3 cursor-pointer group">
               <input

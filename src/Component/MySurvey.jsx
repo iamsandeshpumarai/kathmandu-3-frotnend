@@ -15,7 +15,7 @@ const MySurveys = () => {
   const { data: userDataArray, isLoading, isError } = useQuery({
     queryKey: ['mySurveyData'],
     queryFn: async () => {
-      const response = await api.get('/api/survey/getsurvey');
+      const response = await api.get('/api/survey/getuserSurveyData');
       return response.data.userData; 
     },
   });
