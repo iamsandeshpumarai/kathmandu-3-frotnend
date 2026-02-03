@@ -13,7 +13,7 @@ import toast from 'react-hot-toast';
 const Home = () => {
   const { user } = useAuth();
   const surveyRef = useRef(null); 
-  const isFirstRender = useRef(true);
+  
 
   // --- States ---
   const initialState = {
