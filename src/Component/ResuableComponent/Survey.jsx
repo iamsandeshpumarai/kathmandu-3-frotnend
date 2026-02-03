@@ -17,7 +17,7 @@ const Survey = ({ DevData, dispatch, section, onSubmit, isSubmitting = false }) 
       {/* Survey Card Container */}
       <div className="bg-white shadow-2xl rounded-3xl border border-gray-100 overflow-hidden">
         
-        {/* Header Section - Now with Submit Button */}
+        {/* Header Section */}
         <div className="bg-gradient-to-r from-blue-700 to-indigo-800 p-6 md:p-10 text-white flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <h1 className="text-2xl md:text-4xl font-black mb-3 leading-tight">
@@ -28,30 +28,6 @@ const Survey = ({ DevData, dispatch, section, onSubmit, isSubmitting = false }) 
               <h2 className="text-lg md:text-xl font-medium">{DevData?.Subject}</h2>
             </div>
           </div>
-
-          {/* New Submit Button */}
-          <button
-            onClick={onSubmit}
-            disabled={isSubmitting}
-            className="group relative flex items-center justify-center gap-3 bg-white text-blue-800 px-8 py-4 rounded-2xl font-bold text-lg shadow-xl hover:bg-blue-50 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden"
-          >
-            {isSubmitting ? (
-              <span className="flex items-center gap-2">
-                <svg className="animate-spin h-5 w-5 text-blue-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Processing...
-              </span>
-            ) : (
-              <>
-                <span>सबमिट गर्नुहोस्</span>
-                <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </>
-            )}
-          </button>
         </div>
 
         <div className="p-6 md:p-10 space-y-12">
@@ -103,12 +79,13 @@ const Survey = ({ DevData, dispatch, section, onSubmit, isSubmitting = false }) 
                         </label>
                       ) : (
                         <div className="mt-2 group/input">
-                          <label className="text-sm font-bold text-blue-600/70 block mb-2 uppercase tracking-wider ml-1">
+                          {/* SMALLER LABEL HERE */}
+                          <label className="text-xs font-bold text-blue-600/60 block mb-1.5 uppercase tracking-widest ml-1">
                             {opt.option}
                           </label>
                           <textarea
                             placeholder="तपाईँको जवाफ यहाँ लेख्नुहोस्..."
-                            className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all min-h-[100px] text-lg text-gray-800 placeholder:text-gray-400"
+                            className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all min-h-[80px] text-lg text-gray-800 placeholder:text-gray-400"
                             value={typeof q.answer === 'object' ? (q.answer[opt.option] || "") : ""}
                             onChange={(e) => handleInputChange(q.id, e.target.value, 'text', opt.option)}
                           />
@@ -120,6 +97,32 @@ const Survey = ({ DevData, dispatch, section, onSubmit, isSubmitting = false }) 
               </div>
             </div>
           ))}
+
+          {/* --- SUBMIT BUTTON AT THE BOTTOM --- */}
+          <div className="pt-8 flex justify-center md:justify-end border-t border-gray-100">
+            <button
+              onClick={onSubmit}
+              disabled={isSubmitting}
+              className="group relative flex items-center justify-center gap-3 bg-blue-700 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-xl hover:bg-blue-800 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden w-full md:w-auto"
+            >
+              {isSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                <>
+                  <span>सबमिट गर्नुहोस्</span>
+                  <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

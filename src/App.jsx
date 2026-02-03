@@ -12,8 +12,9 @@ import AdminDashboard from './Component/Admin/AdminDashboard';
 import UserList from './Component/Admin/UserList';
 import AdminSettings from './Component/Admin/AdminSetting';
 import ManageSurvey from './Component/Admin/ManageSurvey';
-import SurveyAnalyticsDashboard from './Component/Admin/SurveyStat';
+
 import SurveyEditContent from './Component/Admin/EditContent';
+import SurveyStats from './Component/Admin/SurveyStats';
 
 function App() {
   const { user, isLoading } = useAuth();
@@ -43,7 +44,8 @@ function App() {
           <Route index  element={<AdminDashboard />} />
           <Route path='users'  element={<UserList />} />
           <Route path='setting'  element={<AdminSettings />} />
-          <Route path='stats'  element={<SurveyAnalyticsDashboard />} />
+          <Route path='surveyresult'  element={<SurveyStats />} />
+          <Route path='stats'  element={<SurveyStats />} />
           <Route path='surveys'  element={<ManageSurvey />} />
           <Route path='editcontent'  element={<SurveyEditContent />} />
           

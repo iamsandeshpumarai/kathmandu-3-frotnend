@@ -23,7 +23,7 @@ const VoterProfileTable = ({ state, dispatch }) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 font-sans">
+    <div className="max-w-7xl mx-auto px-4 py-6 font-sans ">
       {/* Table Title Header */}
       <div className="hidden md:grid grid-cols-2 gap-0 border-x border-t border-gray-800 bg-slate-800 text-white">
         <div className="grid grid-cols-12">
@@ -37,11 +37,11 @@ const VoterProfileTable = ({ state, dispatch }) => {
       </div>
 
       {/* Main Grid Container */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-l border-t md:border-t-0 border-gray-300 shadow-xl overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-l  border-t md:border-t-0 border-gray-300 shadow-xl border rounded-md overflow-hidden">
         
         {fields.map((field, index) => (
           <div key={index} className="grid grid-cols-12 border-r border-b border-gray-300 items-stretch">
-            <div className="col-span-4 bg-slate-100 p-3 flex flex-col justify-center border-r border-gray-300">
+            <div className="col-span-4 bg-slate-100 p-1 flex flex-col justify-center border-r border-gray-300">
               <span className="text-base font-bold text-slate-800">{field.label}</span>
               <span className="text-xs text-blue-600 italic">{field.sub}</span>
             </div>
@@ -57,7 +57,7 @@ const VoterProfileTable = ({ state, dispatch }) => {
                   <option value="">छान्नुहोस् (Select)</option>
                   <option value="पुरुष">पुरुष (Male)</option>
                   <option value="महिला">महिला (Female)</option>
-                  <option value="अन्य">अन्य (Other)</option>
+             
                 </select>
               ) : (
                 <input
