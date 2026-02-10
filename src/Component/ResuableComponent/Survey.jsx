@@ -1,6 +1,7 @@
 import React from 'react';
 
-const Survey = ({ DevData, dispatch, section, onSubmit, isSubmitting = false }) => {
+// FIX 1: Changed isSubmitting to isPending to match Home.js props
+const Survey = ({ DevData, dispatch, section, onSubmit, isPending = false }) => {
   
   const handleInputChange = (questionId, value, type, optionLabel = null) => {
     dispatch({
@@ -14,7 +15,6 @@ const Survey = ({ DevData, dispatch, section, onSubmit, isSubmitting = false }) 
 
   return (
     <div className="max-w-7xl mx-auto my-6 md:my-10 p-0 md:p-2">
-      {/* Survey Card Container */}
       <div className="bg-white shadow-2xl rounded-3xl border border-gray-100 overflow-hidden">
         
         {/* Header Section */}
@@ -32,8 +32,8 @@ const Survey = ({ DevData, dispatch, section, onSubmit, isSubmitting = false }) 
 
         <div className="p-6 md:p-10 space-y-12">
           {DevData?.questions.map((q, qIndex) => (
-            <div key={q.id} className="group animate-fade-in">
-              {/* Question Label */}
+            // FIX 2: Use q._id because your JSON data uses _id, not id
+            <div key={q._id || qIndex} className="group animate-fade-in">
               <div className="flex items-start gap-4 mb-6">
                 <span className="flex-shrink-0 bg-blue-100 text-blue-700 w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-lg shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
                   {qIndex + 1}
@@ -43,14 +43,13 @@ const Survey = ({ DevData, dispatch, section, onSubmit, isSubmitting = false }) 
                 </h3>
               </div>
 
-              {/* Options Layout */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 ml-0 md:ml-14">
                 {q.options.map((opt, index) => {
                   const isText = opt.type === "text";
                   
                   return (
                     <div 
-                      key={index} 
+                      key={opt._id || index} 
                       className={`${isText ? "col-span-full" : "col-span-1"}`}
                     >
                       {opt.type === "checkbox" ? (
@@ -65,10 +64,12 @@ const Survey = ({ DevData, dispatch, section, onSubmit, isSubmitting = false }) 
                             <input
                               type="checkbox"
                               className="peer h-6 w-6 cursor-pointer appearance-none rounded-full border-2 border-gray-300 checked:border-blue-600 checked:bg-blue-600 transition-all"
+                              // Check against opt.option
                               checked={q.answer === opt.option}
                               onChange={(e) => {
+                                // Important: We pass q._id here
                                 const val = e.target.checked ? opt.option : '';
-                                handleInputChange(q.id, val, 'checkbox');
+                                handleInputChange(q._id, val, 'checkbox');
                               }}
                             />
                             <svg className="absolute w-4 h-4 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +80,6 @@ const Survey = ({ DevData, dispatch, section, onSubmit, isSubmitting = false }) 
                         </label>
                       ) : (
                         <div className="mt-2 group/input">
-                          {/* SMALLER LABEL HERE */}
                           <label className="text-xs font-bold text-blue-600/60 block mb-1.5 uppercase tracking-widest ml-1">
                             {opt.option}
                           </label>
@@ -87,7 +87,7 @@ const Survey = ({ DevData, dispatch, section, onSubmit, isSubmitting = false }) 
                             placeholder="तपाईँको जवाफ यहाँ लेख्नुहोस्..."
                             className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all min-h-[80px] text-lg text-gray-800 placeholder:text-gray-400"
                             value={typeof q.answer === 'object' ? (q.answer[opt.option] || "") : ""}
-                            onChange={(e) => handleInputChange(q.id, e.target.value, 'text', opt.option)}
+                            onChange={(e) => handleInputChange(q._id, e.target.value, 'text', opt.option)}
                           />
                         </div>
                       )}
@@ -98,16 +98,17 @@ const Survey = ({ DevData, dispatch, section, onSubmit, isSubmitting = false }) 
             </div>
           ))}
 
-          {/* --- SUBMIT BUTTON AT THE BOTTOM --- */}
+          {/* Submit Button Section */}
           <div className="pt-8 flex justify-center md:justify-end border-t border-gray-100">
             <button
               onClick={onSubmit}
-              disabled={isSubmitting}
+              // FIX 3: Updated to use isPending
+              disabled={isPending}
               className="group relative flex items-center justify-center gap-3 bg-blue-700 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-xl hover:bg-blue-800 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden w-full md:w-auto"
             >
-              {isSubmitting ? (
+              {isPending ? (
                 <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>

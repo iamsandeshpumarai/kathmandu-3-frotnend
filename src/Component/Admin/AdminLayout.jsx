@@ -4,17 +4,17 @@ import {
   BarChart3, 
   ClipboardList, 
   Users, 
-  Settings, 
+ 
   Menu, 
   X, 
   LogOut,
-  Bell,
-  Search,
+
   Edit
 } from 'lucide-react';
 import { Link, useNavigate, Outlet } from 'react-router-dom';
 import api from '../../utils/api';
 import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 const AdminLayout = () => {
     
 const navigate = useNavigate()
@@ -24,7 +24,8 @@ const navigate = useNavigate()
         
       },
       onSuccess: () => {
-     window.location.reload();
+        toast.success('Logged out successfully');
+        window.location.reload();
     // 1. Clear ALL cached data (very important for security)
     
     
@@ -36,6 +37,7 @@ const navigate = useNavigate()
   },
   onError: (error) => {
     console.error("Logout failed:", error);
+    toast.error(error?.response?.data?.message || 'Logout failed');
     // Even if it fails, you might want to force redirect
     navigate('/login');
   }
@@ -48,6 +50,7 @@ const navigate = useNavigate()
     { name: 'Survey Stats', icon: <BarChart3 size={20} />, path: '/admin/stats' },
     // { name: 'Manage Surveys', icon: <ClipboardList size={20} />, path: '/admin/surveys' },
     { name: 'Users List', icon: <Users size={20} />, path: '/admin/users' },
+    { name: 'Survey List', icon: <ClipboardList size={20} />, path: '/admin/surveylist' },
     { name: 'Edit Content', icon: <Edit size={20} />, path: '/admin/editcontent' },
     // { name: 'Settings', icon: <Settings size={20} />, path: '/admin/setting' },
   ];

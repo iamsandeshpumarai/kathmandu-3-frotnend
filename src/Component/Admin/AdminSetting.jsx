@@ -13,6 +13,7 @@ import {
   Loader2
 } from 'lucide-react';
 import api from '../../utils/api';
+import toast from 'react-hot-toast';
 
 const AdminSettings = () => {
   const [showOldPass, setShowOldPass] = useState(false);
@@ -32,10 +33,13 @@ const AdminSettings = () => {
     mutationFn: (data) => api.put('/api/user/update-admin', data),
     onSuccess: () => {
       setMessage({ type: 'success', text: 'Credentials updated successfully!' });
+      toast.success('Credentials updated successfully!');
       setFormData({ oldEmail: '', oldPassword: '', newEmail: '', newPassword: '', confirmPassword: '' });
     },
     onError: (error) => {
-      setMessage({ type: 'error', text: error.response?.data?.message || 'Update failed' });
+      const msg = error.response?.data?.message || 'Update failed';
+      setMessage({ type: 'error', text: msg });
+      toast.error(msg);
     }
   });
 

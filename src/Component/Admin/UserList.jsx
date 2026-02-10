@@ -6,6 +6,7 @@ import {
   ClipboardList, Phone, Info, ArrowLeft
 } from 'lucide-react';
 import api from '../../utils/api';
+import toast from 'react-hot-toast';
 import Loading from '../Loading/Loading';
 
 const UserList = () => {
@@ -40,7 +41,10 @@ const UserList = () => {
     mutationFn: (userId) => api.delete(`api/user/delete/${userId}`),
     onSuccess: () => {
       queryClient.invalidateQueries(['adminUserList']);
-      alert('User deleted');
+      toast.success('User deleted');
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || 'Failed to delete user');
     }
   });
 

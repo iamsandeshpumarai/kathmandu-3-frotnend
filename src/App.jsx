@@ -15,6 +15,8 @@ import ManageSurvey from './Component/Admin/ManageSurvey';
 
 import SurveyEditContent from './Component/Admin/EditContent';
 import SurveyStats from './Component/Admin/SurveyStats';
+import SurveyList from './Component/Admin/SurveyList';
+import CreateSurvey from './Component/Admin/CreateSurvey';
 
 function App() {
   const { user, isLoading } = useAuth();
@@ -48,6 +50,8 @@ function App() {
           <Route path='stats'  element={<SurveyStats />} />
           <Route path='surveys'  element={<ManageSurvey />} />
           <Route path='editcontent'  element={<SurveyEditContent />} />
+          <Route path='surveylist'  element={<SurveyList />} />
+          <Route path='createsurvey'  element={<CreateSurvey />} />
           
         </Route>
 
