@@ -11,13 +11,14 @@ import {
 
   Edit
 } from 'lucide-react';
-import { Link, useNavigate, Outlet } from 'react-router-dom';
+import { Link, useNavigate, Outlet, useLocation } from 'react-router-dom';
 import api from '../../utils/api';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 const AdminLayout = () => {
     
 const navigate = useNavigate()
+const location = useLocation()
     const logout = useMutation({
     mutationFn:async function(){
         await api.post('/api/admin/logout')
@@ -143,7 +144,8 @@ const navigate = useNavigate()
         <main className="flex-1 overflow-y-auto p-4 lg:p-8 bg-slate-50">
           <div className="max-w-7xl mx-auto">
             {/* The <Outlet /> is where child routes will render */}
-            <Outlet />
+            {/* Using only pathname as key - changes when route changes */}
+            <Outlet key={location.pathname} />
           </div>
         </main>
       </div>

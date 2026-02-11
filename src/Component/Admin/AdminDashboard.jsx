@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../utils/api'; 
 import { 
@@ -10,32 +10,78 @@ const AdminDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 1. FETCH USERS
-  const { data: usersData, isLoading: loadingUsers, isError: userError } = useQuery({
+  const { data: usersData =[], isLoading: loadingUsers, isError: userError, refetch: refetchUsers } = useQuery({
     queryKey: ['adminUsers'],
     queryFn: async () => {
-      const res = await api.get('/api/user/user');
-      // Added fallback to empty array to prevent map/filter errors
-      return res.data?.users || [];
+     
+      try {
+        const res = await api.get('/api/user/user');
+        const users = Array.isArray(res.data?.users) ? res.data.users : [];
+        
+        return users;
+      } catch (err) {
+
+        return [];
+      }
     },
+    staleTime: 0,
+    gcTime: 0,
+    retry: 3,
   });
 
   // 2. FETCH SURVEYS
-  const { data: surveysData, isLoading: loadingSurveys, isError: surveyError } = useQuery({
+  const { data: surveysData =[], isLoading: loadingSurveys, isError: surveyError, refetch: refetchSurveys } = useQuery({
     queryKey: ['adminSurveys'],
     queryFn: async () => {
-      const res = await api.get('/api/survey/getsurvey');
-      return res.data?.userData || [];
+      console.log("🔄 Fetching surveys...");
+      try {
+        const res = await api.get('/api/survey/getsurvey');
+        const surveys = Array.isArray(res.data?.userData) ? res.data.userData : [];
+
+        return surveys;
+      } catch (err) {
+
+        return [];
+      }
     },
+    staleTime: 0,
+    gcTime: 0,
+    retry: 3,
   });
+
+  // FORCE REFETCH WHEN COMPONENT MOUNTS
+  useEffect(() => {
+    console.log("🚀 AdminDashboard mounted!");
+    
+    // Ensure data is always an array
+    if (!Array.isArray(usersData)) {
+
+      refetchUsers();
+    }
+    if (!Array.isArray(surveysData)) {
+
+      refetchSurveys();
+    }
+
+    return () => {
+      console.log("🛑 AdminDashboard unmounted");
+    };
+  }, [usersData, surveysData, refetchUsers, refetchSurveys]);
 
   // --- ERROR HANDLING ---
   if (userError || surveyError) {
+   
     return (
       <div className="h-96 flex flex-col items-center justify-center text-red-500 gap-4">
         <AlertCircle size={40} />
         <p className="font-bold text-lg">Failed to load dashboard data.</p>
+        <p className="text-sm text-gray-600">{userError?.message || surveyError?.message}</p>
         <button 
-          onClick={() => window.location.reload()}
+          onClick={() => {
+            console.log("Retry clicked");
+            refetchUsers();
+            refetchSurveys();
+          }}
           className="px-4 py-2 bg-slate-800 text-white rounded-xl text-sm"
         >
           Retry Connection
@@ -46,19 +92,26 @@ const AdminDashboard = () => {
 
   // --- LOADING STATE ---
   if (loadingUsers || loadingSurveys) {
+   
     return (
-      <div className="h-96 flex items-center justify-center">
+      <div className="h-96 flex flex-col items-center justify-center gap-4">
         <Loader2 className="animate-spin text-blue-600" size={40} />
+        <p className="text-slate-600 font-semibold">Loading dashboard...</p>
       </div>
     );
   }
 
-  const totalUsers = usersData?.length || 0;
-  const totalSurveys = surveysData?.length || 0;
+
+  // Ensure we always have arrays
+  const safeUsersData = Array.isArray(usersData) ? usersData : [];
+  const safeSurveysData = Array.isArray(surveysData) ? surveysData : [];
+
+  const totalUsers = safeUsersData.length || 0;
+  const totalSurveys = safeSurveysData.length || 0;
 
   // Gender Percentages (Safe calculations)
-  const maleCount = surveysData?.filter(s => s?.gender === 'पुरुष' || s?.gender === 'Male').length || 0;
-  const femaleCount = surveysData?.filter(s => s?.gender === 'महिला' || s?.gender === 'Female').length || 0;
+  const maleCount = safeSurveysData.filter(s => s?.gender === 'पुरुष' || s?.gender === 'Male').length || 0;
+  const femaleCount = safeSurveysData.filter(s => s?.gender === 'महिला' || s?.gender === 'Female').length || 0;
   const malePercentage = totalSurveys > 0 ? ((maleCount / totalSurveys) * 100).toFixed(1) : 0;
   const femalePercentage = totalSurveys > 0 ? ((femaleCount / totalSurveys) * 100).toFixed(1) : 0;
 
@@ -88,7 +141,7 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {surveysData?.slice(0, 5).map((survey) => (
+                {safeSurveysData?.slice(0, 5).map((survey) => (
                   <tr key={survey._id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 font-bold text-slate-700">{survey?.name || 'N/A'}</td>
                     <td className="px-6 py-4 text-slate-500">W-{survey?.wardNumber || '0'}</td>
@@ -115,7 +168,7 @@ const AdminDashboard = () => {
           </div>
           
           <div className="space-y-3">
-            {usersData?.slice(0, 3).map((user) => (
+            {safeUsersData?.slice(0, 3).map((user) => (
               <UserListItem key={user._id} user={user} />
             ))}
           </div>
@@ -137,7 +190,7 @@ const AdminDashboard = () => {
             </div>
             
             <div className="p-6 overflow-y-auto max-h-[60vh] space-y-4">
-              {usersData?.map((user) => (
+              {safeUsersData?.map((user) => (
                 <UserListItem key={user._id} user={user} full />
               ))}
             </div>
