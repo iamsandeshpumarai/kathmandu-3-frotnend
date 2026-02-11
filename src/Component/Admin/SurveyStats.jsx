@@ -17,13 +17,10 @@ const SurveyStats = () => {
   })
 
    const {data,isLoading,Error}= useQuery({
-        queryKey:['data'],
-        queryFn:async function(){
-        const data =     await api.get('/api/survey/getsurvey');
-      return data.data.userData
+    queryKey: ['adminSurveys'],
+    queryFn: () => api.get('/api/survey/getsurvey').then(res => res.data),
+  });
 
-        } 
-       })
 
       const dataQuestions =   dataSurvey
       if(isLoading) return <Loading/>

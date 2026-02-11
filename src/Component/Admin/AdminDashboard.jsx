@@ -3,24 +3,48 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../../utils/api'; 
 import { 
   Users, ClipboardCheck, User, Loader2, 
-  ArrowUpRight, UserPlus, Mail, CalendarDays, X 
+  ArrowUpRight, UserPlus, Mail, X, AlertCircle 
 } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 1. FETCH USERS
-  const { data: usersData, isLoading: loadingUsers } = useQuery({
+  const { data: usersData, isLoading: loadingUsers, isError: userError } = useQuery({
     queryKey: ['adminUsers'],
-    queryFn: () => api.get('/api/user/user').then(res => res.data.users),
+    queryFn: async () => {
+      const res = await api.get('/api/user/user');
+      // Added fallback to empty array to prevent map/filter errors
+      return res.data?.users || [];
+    },
   });
 
   // 2. FETCH SURVEYS
-  const { data: surveysData, isLoading: loadingSurveys } = useQuery({
+  const { data: surveysData, isLoading: loadingSurveys, isError: surveyError } = useQuery({
     queryKey: ['adminSurveys'],
-    queryFn: () => api.get('/api/survey/getsurvey').then(res => res.data.userData),
+    queryFn: async () => {
+      const res = await api.get('/api/survey/getsurvey');
+      return res.data?.userData || [];
+    },
   });
 
+  // --- ERROR HANDLING ---
+  if (userError || surveyError) {
+    return (
+      <div className="h-96 flex flex-col items-center justify-center text-red-500 gap-4">
+        <AlertCircle size={40} />
+        <p className="font-bold text-lg">Failed to load dashboard data.</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-slate-800 text-white rounded-xl text-sm"
+        >
+          Retry Connection
+        </button>
+      </div>
+    );
+  }
+
+  // --- LOADING STATE ---
   if (loadingUsers || loadingSurveys) {
     return (
       <div className="h-96 flex items-center justify-center">
@@ -32,15 +56,15 @@ const AdminDashboard = () => {
   const totalUsers = usersData?.length || 0;
   const totalSurveys = surveysData?.length || 0;
 
-  // Gender Percentages
-  const maleCount = surveysData?.filter(s => s.gender === 'पुरुष' || s.gender === 'Male').length || 0;
-  const femaleCount = surveysData?.filter(s => s.gender === 'महिला' || s.gender === 'Female').length || 0;
+  // Gender Percentages (Safe calculations)
+  const maleCount = surveysData?.filter(s => s?.gender === 'पुरुष' || s?.gender === 'Male').length || 0;
+  const femaleCount = surveysData?.filter(s => s?.gender === 'महिला' || s?.gender === 'Female').length || 0;
   const malePercentage = totalSurveys > 0 ? ((maleCount / totalSurveys) * 100).toFixed(1) : 0;
   const femalePercentage = totalSurveys > 0 ? ((femaleCount / totalSurveys) * 100).toFixed(1) : 0;
 
   return (
     <div className="p-4 md:p-8 space-y-8 bg-slate-50 min-h-screen">
-      {/* STATS GRID - Fully Responsive */}
+      {/* STATS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatCard label="Total Users" value={totalUsers} icon={<Users className="text-blue-600" />} bg="bg-blue-50" />
         <StatCard label="Total Surveys" value={totalSurveys} icon={<ClipboardCheck className="text-emerald-600" />} bg="bg-emerald-50" />
@@ -66,8 +90,8 @@ const AdminDashboard = () => {
               <tbody className="divide-y divide-slate-50">
                 {surveysData?.slice(0, 5).map((survey) => (
                   <tr key={survey._id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 font-bold text-slate-700">{survey.name}</td>
-                    <td className="px-6 py-4 text-slate-500">W-{survey.wardNumber}</td>
+                    <td className="px-6 py-4 font-bold text-slate-700">{survey?.name || 'N/A'}</td>
+                    <td className="px-6 py-4 text-slate-500">W-{survey?.wardNumber || '0'}</td>
                     <td className="px-6 py-4 text-emerald-600 font-bold text-[10px]">COMPLETED</td>
                   </tr>
                 ))}
@@ -101,7 +125,7 @@ const AdminDashboard = () => {
       {/* FULL USER LIST MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl max-h-[80vh] overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-2xl max-h-[80vh] overflow-hidden shadow-2xl">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white">
               <h3 className="text-xl font-black text-slate-800">All Registered Collectors</h3>
               <button 
@@ -128,7 +152,7 @@ const AdminDashboard = () => {
   );
 };
 
-// Reusable Stat Card Component
+// Reusable Stat Card
 const StatCard = ({ label, value, icon, bg }) => (
   <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-all group">
     <div className="flex justify-between items-start mb-4">
@@ -140,26 +164,31 @@ const StatCard = ({ label, value, icon, bg }) => (
   </div>
 );
 
-// Reusable User Item Component
-const UserListItem = ({ user, full }) => (
-  <div className={`flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 ${full ? 'md:p-4' : ''}`}>
-    <div className="w-10 h-10 shrink-0 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-sm uppercase">
-      {user.username.charAt(0)}
-    </div>
-    <div className="min-w-0 flex-1">
-      <p className="font-bold text-slate-800 truncate text-sm">{user.username}</p>
-      <div className="flex items-center gap-1 text-slate-400">
-        <Mail size={10} />
-        <p className="text-[10px] truncate">{user.email}</p>
+// Reusable User Item Component (ADDED SAFE NAVIGATION)
+const UserListItem = ({ user, full }) => {
+  // Safe character check to prevent crash if username is missing
+  const initial = user?.username ? user.username.charAt(0) : '?';
+  
+  return (
+    <div className={`flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 ${full ? 'md:p-4' : ''}`}>
+      <div className="w-10 h-10 shrink-0 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-sm uppercase">
+        {initial}
       </div>
-    </div>
-    {full && (
-        <div className="hidden sm:block text-right">
-            <p className="text-[10px] font-bold text-slate-400">JOINED</p>
-            <p className="text-[10px] font-medium text-slate-500">{new Date(user.createdAt).toLocaleDateString()}</p>
+      <div className="min-w-0 flex-1">
+        <p className="font-bold text-slate-800 truncate text-sm">{user?.username || 'Unknown User'}</p>
+        <div className="flex items-center gap-1 text-slate-400">
+          <Mail size={10} />
+          <p className="text-[10px] truncate">{user?.email || 'No Email'}</p>
         </div>
-    )}
-  </div>
-);
+      </div>
+      {full && user?.createdAt && (
+          <div className="hidden sm:block text-right">
+              <p className="text-[10px] font-bold text-slate-400">JOINED</p>
+              <p className="text-[10px] font-medium text-slate-500">{new Date(user.createdAt).toLocaleDateString()}</p>
+          </div>
+      )}
+    </div>
+  );
+};
 
 export default AdminDashboard;
