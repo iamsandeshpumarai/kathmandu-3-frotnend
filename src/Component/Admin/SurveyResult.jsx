@@ -89,26 +89,31 @@ const UserDetailsModal = ({ isOpen, onClose, title, users }) => {
 
 // --- Data Processing ---
 const processSurveyData = (dataSurvey, userData) => {
+
   if (!dataSurvey || !Array.isArray(dataSurvey)) return [];
 
   const users = Array.isArray(userData) ? userData : userData?.userData || [];
 
+
+// till here we extract the users data and the datasurvey 
+
   return dataSurvey.map((surveyInfo) => {
+
     const topic = surveyInfo.Topic || surveyInfo.topic || '';
     const subject = surveyInfo.Subject || surveyInfo.subject || '';
-    const surveyId = surveyInfo._id || surveyInfo.surveyKey;
+    const surveyId = surveyInfo._id 
 
     // Match survey by topic (most reliable) or surveyKey
     const relevantUsers = users.filter((u) =>
       u.surveys?.some(
         (s) =>
-          (s.topic || s.Topic) === topic ||
-          s.surveyKey === surveyId
+          s.topic  === topic 
       )
     );
 
+
     return {
-      surveyKey: surveyId || topic,
+      surveyKey: surveyId,
       topic,
       subject,
       totalRespondents: relevantUsers.length,
@@ -120,24 +125,25 @@ const processSurveyData = (dataSurvey, userData) => {
           optionData: {},
           opinions: [],
         };
+        
+
 
         // Initialize options
         (q.options || []).forEach((opt) => {
           const optText = typeof opt === 'string' ? opt : (opt.option || opt.text || '');
           if (optText) qSummary.optionData[optText] = [];
         });
+        
 
         // Process answers
         users.forEach((user) => {
           const userSurvey = user.surveys?.find(
-            (s) => (s.topic || s.Topic) === topic || s.surveyKey === surveyId
-          );
+            (s) => (s.topic || s.Topic) === topic );
           if (!userSurvey?.answers) return;
 
           let userAnswer = userSurvey.answers.find(
             (a) =>
-              a.questionId === q._id ||
-              a.questionId === q.id ||
+              
               a.questionText === q.Question ||
               a.questionText === q.question
           );
