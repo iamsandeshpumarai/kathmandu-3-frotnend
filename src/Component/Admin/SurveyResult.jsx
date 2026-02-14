@@ -1,6 +1,15 @@
 import React, { useMemo, useState } from 'react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
-// --- User Detail Modal ---
+// --- User Detail Modal (अपरिवर्तित) ---
 const UserDetailsModal = ({ isOpen, onClose, title, users }) => {
   if (!isOpen) return null;
 
@@ -25,21 +34,14 @@ const UserDetailsModal = ({ isOpen, onClose, title, users }) => {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
       <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
-        {/* Header */}
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
           <div>
             <h3 className="text-2xl font-black text-gray-800">{title}</h3>
             <p className="text-blue-600 font-bold">छनौट गर्ने व्यक्तिहरूको सूची ({users.length})</p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-3 hover:bg-gray-200 rounded-full transition-all text-3xl leading-none text-gray-400 hover:text-gray-800"
-          >
-            ×
-          </button>
+          <button onClick={onClose} className="p-3 hover:bg-gray-200 rounded-full transition-all text-3xl leading-none text-gray-400 hover:text-gray-800">×</button>
         </div>
 
-        {/* Table */}
         <div className="p-6 overflow-y-auto flex-1">
           <div id="printable-users-table">
             <table className="w-full text-left border-collapse">
@@ -67,50 +69,29 @@ const UserDetailsModal = ({ isOpen, onClose, title, users }) => {
           </div>
         </div>
 
-        {/* Footer Buttons */}
         <div className="p-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-4">
-          <button
-            onClick={handlePrintUsers}
-            className="px-10 py-3 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-bold text-sm transition-all active:scale-95 shadow-md"
-          >
-            प्रिन्ट गर्नुहोस्
-          </button>
-          <button
-            onClick={onClose}
-            className="px-10 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm transition-all active:scale-95 shadow-md"
-          >
-            बन्द गर्नुहोस्
-          </button>
+          <button onClick={handlePrintUsers} className="px-10 py-3 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-bold text-sm transition-all active:scale-95 shadow-md">प्रिन्ट गर्नुहोस्</button>
+          <button onClick={onClose} className="px-10 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm transition-all active:scale-95 shadow-md">बन्द गर्नुहोस्</button>
         </div>
       </div>
     </div>
   );
 };
 
-// --- Data Processing ---
+// --- Data Processing (रायमा पूर्ण यूजर डाटा थपिएको) ---
 const processSurveyData = (dataSurvey, userData) => {
-
   if (!dataSurvey || !Array.isArray(dataSurvey)) return [];
 
   const users = Array.isArray(userData) ? userData : userData?.userData || [];
 
-
-// till here we extract the users data and the datasurvey 
-
   return dataSurvey.map((surveyInfo) => {
-
     const topic = surveyInfo.Topic || surveyInfo.topic || '';
     const subject = surveyInfo.Subject || surveyInfo.subject || '';
-    const surveyId = surveyInfo._id 
+    const surveyId = surveyInfo._id;
 
-    // Match survey by topic (most reliable) or surveyKey
     const relevantUsers = users.filter((u) =>
-      u.surveys?.some(
-        (s) =>
-          s.topic  === topic 
-      )
+      u.surveys?.some((s) => s.topic === topic)
     );
-
 
     return {
       surveyKey: surveyId,
@@ -125,30 +106,19 @@ const processSurveyData = (dataSurvey, userData) => {
           optionData: {},
           opinions: [],
         };
-        
 
-
-        // Initialize options
         (q.options || []).forEach((opt) => {
           const optText = typeof opt === 'string' ? opt : (opt.option || opt.text || '');
           if (optText) qSummary.optionData[optText] = [];
         });
-        
 
-        // Process answers
         users.forEach((user) => {
-          const userSurvey = user.surveys?.find(
-            (s) => (s.topic || s.Topic) === topic );
+          const userSurvey = user.surveys?.find((s) => (s.topic || s.Topic) === topic);
           if (!userSurvey?.answers) return;
 
           let userAnswer = userSurvey.answers.find(
-            (a) =>
-              
-              a.questionText === q.Question ||
-              a.questionText === q.question
+            (a) => a.questionText === q.Question || a.questionText === q.question
           );
-
-          // Fallback to index
           if (!userAnswer) userAnswer = userSurvey.answers[qIndex];
           if (!userAnswer?.answer) return;
 
@@ -161,31 +131,24 @@ const processSurveyData = (dataSurvey, userData) => {
             profession: user.currentJob,
           };
 
-          // Handle different answer types
           if (Array.isArray(val)) {
             val.forEach((item) => {
               const text = typeof item === 'string' ? item.trim() : '';
               if (text) {
-                if (qSummary.optionData[text]) {
-                  qSummary.optionData[text].push(userInfo);
-                } else {
-                  qSummary.opinions.push({ userName: user.name, text });
-                }
+                if (qSummary.optionData[text]) qSummary.optionData[text].push(userInfo);
+                else qSummary.opinions.push({ userName: user.name, text, user: userInfo });
               }
             });
           } else if (typeof val === 'string') {
             const trimmed = val.trim();
             if (trimmed) {
-              if (qSummary.optionData[trimmed]) {
-                qSummary.optionData[trimmed].push(userInfo);
-              } else {
-                qSummary.opinions.push({ userName: user.name, text: trimmed });
-              }
+              if (qSummary.optionData[trimmed]) qSummary.optionData[trimmed].push(userInfo);
+              else qSummary.opinions.push({ userName: user.name, text: trimmed, user: userInfo });
             }
           } else if (typeof val === 'object' && val !== null) {
             Object.entries(val).forEach(([label, text]) => {
               if (typeof text === 'string' && text.trim()) {
-                qSummary.opinions.push({ userName: user.name, label, text: text.trim() });
+                qSummary.opinions.push({ userName: user.name, label, text: text.trim(), user: userInfo });
               }
             });
           }
@@ -201,121 +164,193 @@ const processSurveyData = (dataSurvey, userData) => {
 const SurveyResultsComponent = ({ dataSurvey, userData }) => {
   const processedData = useMemo(() => processSurveyData(dataSurvey, userData), [dataSurvey, userData]);
 
+  // प्रत्येक सर्वेक्षणको लागि अलग भ्यू मोड (टेबल वा बार चार्ट)
+  const [viewModes, setViewModes] = useState({});
+
   const [modal, setModal] = useState({ isOpen: false, title: '', users: [] });
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-8 lg:p-10 bg-gray-50 min-h-screen">
-      {processedData.map((survey) => (
-        <section key={survey.surveyKey} className="mb-16">
-          {/* Survey Header */}
-          <div className="bg-gradient-to-br from-indigo-600 via-blue-600 to-blue-700 rounded-3xl p-8 md:p-10 mb-10 text-white shadow-xl relative overflow-hidden">
-            <div className="relative z-10">
-              <h2 className="text-3xl md:text-4xl font-black mb-3 uppercase tracking-tight">{survey.topic}</h2>
-              <p className="text-blue-100 text-lg opacity-90">{survey.subject}</p>
-              <p className="mt-4 text-blue-200 font-medium">
-                कुल उत्तरदाताहरू: <span className="font-bold text-white">{survey.totalRespondents}</span>
-              </p>
-            </div>
-            <div className="absolute -right-12 -bottom-12 w-72 h-72 bg-white/10 rounded-full blur-3xl" />
-          </div>
+      {processedData.map((survey) => {
+        const currentMode = viewModes[survey.surveyKey] || 'table'; // default = पुरानो टेबल
 
-          <div className="space-y-12">
-            {survey.questions.map((q) => (
-              <div
-                key={q.id}
-                className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-2xl transition-all duration-300"
-              >
-                <div className="p-6 md:p-10">
-                  {/* Question */}
-                  <div className="flex gap-4 mb-8">
-                    <div className="h-11 w-11 flex-shrink-0 bg-indigo-600 text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg">
-                      Q
-                    </div>
-                    <h3 className="text-xl md:text-2xl font-bold text-gray-800 leading-snug">{q.question}</h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
-                    {/* Options Section */}
-                    <div className="lg:col-span-3">
-                      <h4 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4 ml-1">
-                        विकल्प छनौट विवरण (क्लिक गर्नुहोस्)
-                      </h4>
-                      <div className="bg-gray-50 border border-gray-100 rounded-2xl overflow-hidden">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="bg-gray-100">
-                              <th className="p-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">विकल्प</th>
-                              <th className="p-5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider w-32">संख्या</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-100">
-                            {Object.entries(q.optionData).map(([opt, userList]) => (
-                              <tr
-                                key={opt}
-                                onClick={() => userList.length > 0 && setModal({ isOpen: true, title: opt, users: userList })}
-                                className={`group transition-all ${userList.length > 0 ? 'hover:bg-white cursor-pointer' : 'opacity-50'}`}
-                              >
-                                <td className="p-5">
-                                  <span className={`font-semibold text-base ${userList.length > 0 ? 'text-gray-800 group-hover:text-indigo-600' : 'text-gray-400'}`}>
-                                    {opt}
-                                  </span>
-                                </td>
-                                <td className="p-5 text-center">
-                                  <div
-                                    className={`inline-flex items-center justify-center min-w-[52px] h-10 rounded-2xl font-bold text-sm transition-all ${
-                                      userList.length > 0
-                                        ? 'bg-indigo-100 text-indigo-700 group-hover:bg-indigo-600 group-hover:text-white'
-                                        : 'bg-gray-200 text-gray-400'
-                                    }`}
-                                  >
-                                    {userList.length}
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    {/* Opinions Section */}
-                    <div className="lg:col-span-2">
-                      <h4 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4 ml-1">
-                        खुला सुझाव / राय
-                      </h4>
-                      <div className="space-y-4 max-h-[420px] overflow-y-auto pr-2 custom-scrollbar">
-                        {q.opinions.length > 0 ? (
-                          q.opinions.map((op, i) => (
-                            <div key={i} className="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm hover:border-indigo-200 transition-all">
-                              <div className="flex justify-between items-start mb-2">
-                                <span className="text-xs font-bold bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg">
-                                  {op.userName}
-                                </span>
-                                {op.label && (
-                                  <span className="text-[10px] font-medium text-gray-400 border px-2 py-0.5 rounded">
-                                    {op.label}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-gray-700 italic text-[15px] leading-relaxed">"{op.text}"</p>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="h-40 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-3xl text-gray-400 font-medium">
-                            कुनै खुला राय उपलब्ध छैन
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+        return (
+          <section key={survey.surveyKey} className="mb-16">
+            {/* Survey Header + Radio Toggle */}
+            <div className="bg-gradient-to-br from-indigo-600 via-blue-600 to-blue-700 rounded-3xl p-8 md:p-10 mb-10 text-white shadow-xl relative overflow-hidden">
+              <div className="relative z-10">
+                <h2 className="text-3xl md:text-4xl font-black mb-3 uppercase tracking-tight">{survey.topic}</h2>
+                <p className="text-blue-100 text-lg opacity-90">{survey.subject}</p>
+                <p className="mt-4 text-blue-200 font-medium">
+                  कुल उत्तरदाताहरू: <span className="font-bold text-white">{survey.totalRespondents}</span>
+                </p>
               </div>
-            ))}
-          </div>
-        </section>
-      ))}
+              <div className="absolute -right-12 -bottom-12 w-72 h-72 bg-white/10 rounded-full blur-3xl" />
+            </div>
 
-      {/* Modal */}
+            {/* Radio Button - प्रत्येक सर्वेक्षणको लागि */}
+            <div className="flex justify-end mb-8">
+              <div className="bg-white rounded-3xl shadow p-1 flex">
+                <label
+                  className={`px-8 py-3 rounded-3xl cursor-pointer font-medium transition-all text-sm ${
+                    currentMode === 'table' ? 'bg-indigo-600 text-white shadow' : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name={`view-${survey.surveyKey}`}
+                    checked={currentMode === 'table'}
+                    onChange={() => setViewModes((prev) => ({ ...prev, [survey.surveyKey]: 'table' }))}
+                    className="hidden"
+                  />
+                  टेबल स्टाइल
+                </label>
+
+                <label
+                  className={`px-8 py-3 rounded-3xl cursor-pointer font-medium transition-all text-sm ${
+                    currentMode === 'chart' ? 'bg-indigo-600 text-white shadow' : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name={`view-${survey.surveyKey}`}
+                    checked={currentMode === 'chart'}
+                    onChange={() => setViewModes((prev) => ({ ...prev, [survey.surveyKey]: 'chart' }))}
+                    className="hidden"
+                  />
+                  बार चार्ट
+                </label>
+              </div>
+            </div>
+
+            <div className="space-y-12">
+              {survey.questions.map((q) => {
+                // बार चार्टको लागि डाटा तयार
+                const chartData = Object.entries(q.optionData)
+                  .map(([option, userList]) => ({ option, count: userList.length }))
+                  .sort((a, b) => b.count - a.count);
+
+                return (
+                  <div
+                    key={q.id}
+                    className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-2xl transition-all duration-300"
+                  >
+                    <div className="p-6 md:p-10">
+                      <div className="flex gap-4 mb-8">
+                        <div className="h-11 w-11 flex-shrink-0 bg-indigo-600 text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg">Q</div>
+                        <h3 className="text-xl md:text-2xl font-bold text-gray-800 leading-snug">{q.question}</h3>
+                      </div>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
+                        {/* विकल्प सेक्सन - रेडियो अनुसार टेबल वा बार चार्ट */}
+                        <div className="lg:col-span-3">
+                          <h4 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4 ml-1">
+                            विकल्प छनौट विवरण {currentMode === 'chart' ? '(बारमा क्लिक गर्नुहोस्)' : '(क्लिक गर्नुहोस्)'}
+                          </h4>
+
+                          {currentMode === 'table' ? (
+                            // पुरानो टेबल स्टाइल
+                            <div className="bg-gray-50 border border-gray-100 rounded-2xl overflow-hidden">
+                              <table className="w-full">
+                                <thead>
+                                  <tr className="bg-gray-100">
+                                    <th className="p-5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">विकल्प</th>
+                                    <th className="p-5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider w-32">संख्या</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                  {Object.entries(q.optionData).map(([opt, userList]) => (
+                                    <tr
+                                      key={opt}
+                                      onClick={() => userList.length > 0 && setModal({ isOpen: true, title: opt, users: userList })}
+                                      className={`group transition-all ${userList.length > 0 ? 'hover:bg-white cursor-pointer' : 'opacity-50'}`}
+                                    >
+                                      <td className="p-5">
+                                        <span className={`font-semibold text-base ${userList.length > 0 ? 'text-gray-800 group-hover:text-indigo-600' : 'text-gray-400'}`}>
+                                          {opt}
+                                        </span>
+                                      </td>
+                                      <td className="p-5 text-center">
+                                        <div className={`inline-flex items-center justify-center min-w-[52px] h-10 rounded-2xl font-bold text-sm transition-all ${userList.length > 0 ? 'bg-indigo-100 text-indigo-700 group-hover:bg-indigo-600 group-hover:text-white' : 'bg-gray-200 text-gray-400'}`}>
+                                          {userList.length}
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          ) : (
+                            // नयाँ बार चार्ट (Recharts)
+                            <div className="bg-gray-50 border border-gray-100 rounded-3xl p-6">
+                              <ResponsiveContainer width="100%" height={380}>
+                                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+                                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                  <XAxis dataKey="option" angle={-45} textAnchor="end" height={80} tick={{ fill: '#6b7280', fontSize: 13 }} />
+                                  <YAxis tick={{ fill: '#6b7280' }} />
+                                  <Tooltip
+                                    cursor={{ fill: 'rgba(99, 102, 241, 0.1)' }}
+                                    formatter={(value) => [`${value} (${Math.round((value / survey.totalRespondents) * 100)}%)`, 'उत्तरदाता']}
+                                  />
+                                  <Bar
+                                    dataKey="count"
+                                    fill="#4f46e5"
+                                    radius={[6, 6, 0, 0]}
+                                    onClick={(data) => {
+                                      const userList = q.optionData[data.option];
+                                      if (userList?.length > 0) setModal({ isOpen: true, title: data.option, users: userList });
+                                    }}
+                                    cursor="pointer"
+                                  />
+                                </BarChart>
+                              </ResponsiveContainer>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* राय सेक्सन (सबै डाटा एकै ठाउँमा) */}
+                        <div className="lg:col-span-2">
+                          <h4 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4 ml-1">खुला सुझाव / राय</h4>
+                          <div className="space-y-4 max-h-[420px] overflow-y-auto pr-2 custom-scrollbar">
+                            {q.opinions.length > 0 ? (
+                              q.opinions.map((op, i) => (
+                                <div
+                                  key={i}
+                                  onClick={() => op.user && setModal({ isOpen: true, title: `${op.userName} को राय`, users: [op.user] })}
+                                  className="bg-white border border-gray-100 p-6 rounded-3xl shadow-sm hover:border-indigo-200 hover:shadow transition-all cursor-pointer group"
+                                >
+                                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-4 text-xs">
+                                    <span className="font-bold bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-2xl">{op.userName}</span>
+                                    {op.user && (
+                                      <>
+                                        <span className="text-gray-500">उमेर: {op.user.age || '–'}</span>
+                                        <span className="text-gray-500">लिङ्ग: {op.user.gender || '–'}</span>
+                                        <span className="text-gray-500">वडा: {op.user.ward || '–'}</span>
+                                        <span className="text-gray-500">पेशा: {op.user.profession || '–'}</span>
+                                      </>
+                                    )}
+                                    {op.label && <span className="text-[10px] font-medium text-gray-400 border px-3 py-1 rounded-xl">{op.label}</span>}
+                                  </div>
+                                  <p className="text-gray-700 italic text-[17px] leading-relaxed group-hover:text-gray-800">"{op.text}"</p>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="h-40 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-3xl text-gray-400 font-medium">
+                                कुनै खुला राय उपलब्ध छैन
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
+
       <UserDetailsModal
         isOpen={modal.isOpen}
         onClose={() => setModal({ isOpen: false, title: '', users: [] })}

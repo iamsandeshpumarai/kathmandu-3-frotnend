@@ -48,7 +48,7 @@ const location = useLocation()
 
   const menuItems = [
     { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/admin' },
-    { name: 'Survey Stats', icon: <BarChart3 size={20} />, path: '/admin/stats' },
+    { name: 'Survey Stat', icon: <BarChart3 size={20} />, path: '/admin/stats' },
     // { name: 'Manage Surveys', icon: <ClipboardList size={20} />, path: '/admin/surveys' },
     { name: 'Users List', icon: <Users size={20} />, path: '/admin/users' },
     { name: 'Survey List', icon: <ClipboardList size={20} />, path: '/admin/surveylist' },
