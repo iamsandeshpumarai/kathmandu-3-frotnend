@@ -1,3 +1,4 @@
+import { Loader2 } from 'lucide-react';
 import React from 'react';
 
 // FIX 1: Changed isSubmitting to isPending to match Home.js props
@@ -12,7 +13,7 @@ const Survey = ({ DevData, dispatch, section, onSubmit, isPending = false }) => 
       optionLabel,
     });
   };
-
+if(!DevData) return <Loader2/>
   return (
     <div className="max-w-7xl mx-auto my-6 md:my-10 p-0 md:p-2">
       <div className="bg-white shadow-2xl rounded-3xl border border-gray-100 overflow-hidden">

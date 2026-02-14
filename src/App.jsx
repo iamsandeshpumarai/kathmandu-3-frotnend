@@ -11,7 +11,6 @@ import AdminLayout from './Component/Admin/AdminLayout';
 import AdminDashboard from './Component/Admin/AdminDashboard';
 import UserList from './Component/Admin/UserList';
 import AdminSettings from './Component/Admin/AdminSetting';
-import ManageSurvey from './Component/Admin/ManageSurvey';
 
 import SurveyEditContent from './Component/Admin/EditContent';
 import SurveyStats from './Component/Admin/SurveyStats';
@@ -48,7 +47,6 @@ function App() {
           <Route path='setting'  element={<AdminSettings />} />
           <Route path='surveyresult'  element={<SurveyStats />} />
           <Route path='stats'  element={<SurveyStats />} />
-          <Route path='surveys'  element={<ManageSurvey />} />
           <Route path='editcontent'  element={<SurveyEditContent />} />
           <Route path='surveylist'  element={<SurveyList />} />
           <Route path='createsurvey'  element={<CreateSurvey />} />

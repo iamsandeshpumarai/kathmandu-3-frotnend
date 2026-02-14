@@ -97,7 +97,13 @@ const Home = () => {
   // --- 6. Submission ---
   const sendData = useMutation({
     mutationFn: async (data) => await api.post('/api/survey/createsurvey', { data }),
-    onSuccess: () => toast.success("Survey Saved Successfully"),
+    onSuccess: () =>{ toast.success("Survey Saved Successfully")
+
+setTimeout(()=>{
+  window.location.reload();
+},200)
+
+    },
     onError: (err) => toast.error(err?.response?.data?.message || "Failed to save survey")
   });
 
@@ -108,10 +114,11 @@ const Home = () => {
       submittedBy: user?.id || "anonymous"
     };
     sendData.mutate(fullData);
+
   };
 
   // --- 7. Conditional Rendering ---
-  if (isLoading || surveyState.length === 0) return <Loading />;
+
 
   const currentSectionData = surveyState[activeIndex];
 
