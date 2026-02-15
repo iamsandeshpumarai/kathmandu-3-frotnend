@@ -37,7 +37,7 @@ const location = useLocation()
     // window.location.href = '/login'; 
   },
   onError: (error) => {
-    console.error("Logout failed:", error);
+    
     toast.error(error?.response?.data?.message || 'Logout failed');
     // Even if it fails, you might want to force redirect
     navigate('/login');

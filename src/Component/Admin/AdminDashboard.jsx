@@ -33,7 +33,7 @@ const AdminDashboard = () => {
   const { data: surveysData =[], isLoading: loadingSurveys, isError: surveyError, refetch: refetchSurveys } = useQuery({
     queryKey: ['adminSurveys'],
     queryFn: async () => {
-      console.log("🔄 Fetching surveys...");
+
       try {
         const res = await api.get('/api/survey/getsurvey');
         const surveys = Array.isArray(res.data?.userData) ? res.data.userData : [];
@@ -51,7 +51,7 @@ const AdminDashboard = () => {
 
   // FORCE REFETCH WHEN COMPONENT MOUNTS
   useEffect(() => {
-    console.log("🚀 AdminDashboard mounted!");
+
     
     // Ensure data is always an array
     if (!Array.isArray(usersData)) {
@@ -64,7 +64,7 @@ const AdminDashboard = () => {
     }
 
     return () => {
-      console.log("🛑 AdminDashboard unmounted");
+
     };
   }, [usersData, surveysData, refetchUsers, refetchSurveys]);
 
@@ -78,7 +78,7 @@ const AdminDashboard = () => {
         <p className="text-sm text-gray-600">{userError?.message || surveyError?.message}</p>
         <button 
           onClick={() => {
-            console.log("Retry clicked");
+            
             refetchUsers();
             refetchSurveys();
           }}
