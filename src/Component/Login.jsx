@@ -3,8 +3,7 @@ import { Eye, EyeOff, User, Mail, Lock, ArrowRight, ClipboardList, Loader2 } fro
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-
-
+import {toast} from 'react-hot-toast'
 const LoginPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -43,7 +42,7 @@ const LoginPage = () => {
       }
     },
     onError: (error) => {
-      alert(error.response?.data?.message || "प्रविष्टिमा समस्या देखियो। कृपया फेरि प्रयास गर्नुहोला।");
+toast.error(error.message)
     }
   });
 
