@@ -178,12 +178,12 @@ const SurveyDashboard = () => {
                           {survey.isActive ? <Eye size={18} /> : <EyeOff size={18} />}
                         </button>
                         
-                        {/* <button 
+                         <button 
                           onClick={() => navigate(`/admin/editsurvey/${survey._id}`)}
                           className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg md:rounded-xl"
                         >
                           <Edit2 size={18} />
-                        </button> */}
+                        </button> 
 
                         <button 
                           onClick={() => {

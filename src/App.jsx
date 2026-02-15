@@ -16,6 +16,7 @@ import SurveyEditContent from './Component/Admin/EditContent';
 import SurveyStats from './Component/Admin/SurveyStats';
 import SurveyList from './Component/Admin/SurveyList';
 import CreateSurvey from './Component/Admin/CreateSurvey';
+import EditQuestion from './Component/Admin/EditQuestion';
 
 function App() {
   const { user, isLoading } = useAuth();
@@ -50,6 +51,7 @@ function App() {
           <Route path='editcontent'  element={<SurveyEditContent />} />
           <Route path='surveylist'  element={<SurveyList />} />
           <Route path='createsurvey'  element={<CreateSurvey />} />
+          <Route path='editsurvey/:id'  element={<EditQuestion />} />
           
         </Route>
 
