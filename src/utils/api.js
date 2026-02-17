@@ -8,7 +8,7 @@ const api = axios.create({
   // baseURL: "https://survey-api.kantipurride.com/",
   // baseURL:"http://localhost:5000/",
   
-baseURL:"https://kathamandusurveybackend.onrender.com/",
+baseURL:"https://kathamandusurveybackend.onrender.com",
   
   withCredentials: true
 });
