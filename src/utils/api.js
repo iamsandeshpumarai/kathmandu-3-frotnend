@@ -6,7 +6,10 @@ const api = axios.create({
 
   // baseURL:'https://chitwanbackend1.onrender.com',
   // baseURL: "https://survey-api.kantipurride.com/",
-  baseURL:"http://localhost:5000/",
+  // baseURL:"http://localhost:5000/",
+  
+baseURL:"https://kathamandusurveybackend.onrender.com/",
+  
   withCredentials: true
 });
 
